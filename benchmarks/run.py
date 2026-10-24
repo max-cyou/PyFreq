@@ -99,12 +99,17 @@ def main() -> None:
     hashes['snapshots'] = sha256(args.snapshots)
     hashes['core/solver.py'] = sha256(PROJECT / 'core/solver.py')
     hashes['core/matching.py'] = sha256(PROJECT / 'core/matching.py')
+    hashes['core/ranking.py'] = sha256(PROJECT / 'core/ranking.py')
 
     rows = []
     for case in cases:
         question = case['data']
         start = perf_counter()
-        prediction = solve_from_results(case['results'], question['answers'])
+        prediction = solve_from_results(
+            results=case['results'],
+            question=question['question'],
+            answers=question['answers'],
+        )
         elapsed_ms = (perf_counter() - start) * 1000
         index = prediction['index']
         rows.append({
