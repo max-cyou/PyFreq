@@ -1,6 +1,7 @@
 import uvicorn
 
-from fastapi import FastAPI, APIRouter
+from ddgs.exceptions import TimeoutException
+from fastapi import FastAPI, APIRouter, HTTPException
 from schemas import TextQuestion, TextResult
 
 from core.solver import solve_text_question
@@ -24,10 +25,20 @@ def health():
 
 @router.post('/solve/text', response_model=TextResult)
 async def solve_text(data: TextQuestion):
-    return solve_text_question(
-        question=data.question,
-        answers=data.answers,
-    )
+    try:
+        return solve_text_question(
+            question=data.question,
+            answers=data.answers,
+            timeout=data.timeout,
+            backend=data.backend,
+            max_results=data.max_results,
+            confidence_gap=data.confidence_gap,
+        )
+    except TimeoutException:
+        raise HTTPException(
+            status_code=504,
+            detail='Поисковик не ответил вовремя. Повторите запрос позже.',
+        ) from None
 
 app.include_router(router)
 
