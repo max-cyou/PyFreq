@@ -76,7 +76,52 @@ def polarity(question: str, answer: str, context: str) -> int:
     return 1 if bool(negative) == bool(negations(words(question))) else -1
 
 
+def definition_terms(text: str) -> tuple[str, ...]:
+    return tuple(lemmatize(token) for token in normalize_math(text).strip(' .?!').split())
+
+
+def definition_scores(results: list[dict], question: str, answers: list[str]) -> list[float] | None:
+    question = normalize_latex(question).strip().lower()
+    match = re.fullmatch(
+        r'(?:как\s+называ(?:ется|ются)|что\s+такое|'
+        r'(?:кто|что|какой|какая|какое|какие)(?:\s+[а-яё]+)?\s+явля(?:ется|ются))\s+(.+?)\s*\??',
+        question,
+    )
+    if not match or negations(words(question)):
+        return None
+    target = definition_terms(match.group(1))
+    candidates = [definition_terms(answer) for answer in answers]
+    scores = [0.0] * len(answers)
+    rejected = set()
+    seen = set()
+    for result in results:
+        for fragment, _ in contexts(result):
+            identity = normalize_math(fragment)
+            if identity in seen or any(symbol in fragment for symbol in '?«»“”"'):
+                continue
+            seen.add(identity)
+            # Accept complete standalone definitions, not embedded mentions.
+            parts = re.split(r'\s+[—–]\s+|\s*=\s*', fragment.strip())
+            if len(parts) != 2:
+                continue
+            left, right = (definition_terms(part) for part in parts)
+            for i, candidate in enumerate(candidates):
+                if not candidate or candidates.count(candidate) != 1:
+                    continue
+                if (left == target and right == candidate) or (right == target and left == candidate):
+                    scores[i] += 1
+                if (left == candidate and right == ('не',) + target) or (left == target and right == ('не',) + candidate):
+                    rejected.add(i)
+    supported = [i for i, score in enumerate(scores) if score > 0]
+    if len(supported) == 1 and supported[0] not in rejected:
+        return scores
+    return None
+
+
 def rank_answers(results: list[dict], question: str, answers: list[str]) -> list[float]:
+    definitions = definition_scores(results, question, answers)
+    if definitions is not None:
+        return definitions
     documents = []
     seen_urls, seen_documents = set(), set()
     for result in results:
