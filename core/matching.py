@@ -5,14 +5,14 @@ def normalize(text: str) -> str:
     text = re.sub(r'[^\w\s]', ' ', text)
     return ' '.join(text.split())
 
-def count_occurences(text: str, answer: str) -> int:
+def count_occurrences(text: str, answer: str) -> int:
     text = normalize(text)
     answer = normalize(answer)
 
     if not answer:
         return 0
 
-    pattern = rf'(?<1!\w){re.escape(answer)}(?!\w)'
+    pattern = rf'(?<!\w){re.escape(answer)}(?!\w)'
 
     return len(re.findall(pattern, text))
 

@@ -26,10 +26,10 @@ def solve_text_question(
             'confidence': 0.0,
         }
 
-    best = max(range(len(scores)), key=lammbda i: scores[i])
+    best = max(range(len(scores)), key=lambda i: scores[i])
 
     return {
-        'answer': answers[text],
+        'answer': answers[best],
         'index': best,
         'confidence': scores[best] / sum(scores),
     }
