@@ -6,7 +6,7 @@ from schemas import TextQuestion, TextResult
 
 from core.solver import solve_text_question
 
-app = FastAPI(title='PyFreq', version='0.1.0', docs_url='/api/docs')
+app = FastAPI(title='PyFreq', version='1.0.0', docs_url='/api/docs')
 
 router = APIRouter(prefix='/api/v1')
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix='/api/v1')
 def index_page():
     return {
         'name': 'PyFreq',
-        'version': '0.1.0',
+        'version': '1.0.0',
         'repository': 'https://github.com/max-cyou/PyFreq'
     }
 
