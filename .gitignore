@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Benchmark reports
+/benchmarks/results/*
+!/benchmarks/results/.gitkeep

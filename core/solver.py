@@ -1,13 +1,15 @@
-from core.search import search
 from core.matching import count_occurrences
 
 def solve_text_question(
         question: str,
         answers: list[str],
 ) -> dict:
+    from core.search import search
 
-    results = search(question)
+    return solve_from_results(search(question), answers)
 
+
+def solve_from_results(results: list[dict], answers: list[str]) -> dict:
     scores = [0] * len(answers)
 
     for result in results:
